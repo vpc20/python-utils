@@ -1,19 +1,7 @@
 import os
 
-#
-# def list_dir_recursive(path):
-#     try:
-#         dir_list = os.listdir(path)
-#     except WindowsError:
-#         pass
-#
-#     for dir_entry in dir_list:
-#         complete_dir_entry = join(path, dir_entry)
-#         if isdir(complete_dir_entry):
-#             list_dir_recursive(complete_dir_entry)
-#         else:
-#             print(complete_dir_entry)  # print filenames
 
+# write json file for musescore batch conversion to pdf
 def write_json(filename):
     json_filenames = f'''
     {{
