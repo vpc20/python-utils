@@ -8,6 +8,7 @@ str_date = date(2031, 6, 17)
 end_date = date(2033, 6, 17)
 curr_date = str_date
 
+# new excel file
 wb = Workbook()
 ws = wb.active
 # ws1.delete_cols(1,3) # delete 3 columns

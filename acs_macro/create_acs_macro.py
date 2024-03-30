@@ -66,16 +66,18 @@ def write_it(outf, job, eff_date, pol, row, last_row):
 
 
 def gen_acs_macro():
-    wb1 = openpyxl.load_workbook("jobs.xlsx")
+    xl_filename = 'jobs-07329178-2031-06-17-2033-06-17.xlsx'
+    wb1 = openpyxl.load_workbook(xl_filename)
     wb = wb1.active
 
     # ha script header
-    outf = open('macro1.mac', 'w')
+    macro_filename = xl_filename.rstrip('.xls').replace('jobs', 'macro') + '.mac'
+    outf = open(macro_filename, 'w')
     hdr1 = '<HAScript name="macro1" description="" timeout="60000" pausetime="300" promptall="true" blockinput="true" author="vpc" creationdate="Nov 15, 2023 8:21:30 AM" supressclearevents="false" usevars="false" ignorepauseforenhancedtn="true" delayifnotenhancedtn="0" ignorepausetimeforenhancedtn="true" continueontimeout="false">'
     outf.write(hdr1)
     outf.close()
 
-    outf = open('macro1.mac', 'a')
+    outf = open(macro_filename, 'a')
     for row in range(1, wb.max_row + 1):
         for col in range(1, wb.max_column + 1):
             cell = wb.cell(row, col)
