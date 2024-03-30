@@ -75,7 +75,7 @@ def gen_acs_macro():
     outf.write(hdr1)
     outf.close()
 
-    outf = open('acs_macro.mac', 'a')
+    outf = open('macro1.mac', 'a')
     for row in range(1, wb.max_row + 1):
         for col in range(1, wb.max_column + 1):
             cell = wb.cell(row, col)
