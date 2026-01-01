@@ -3,16 +3,7 @@ from pathlib import Path
 import openpyxl
 
 
-def write_it(outf, job, eff_date, pol, row, last_row):
-    entry_screen_flag = 'false'
-    exit_screen_flag = 'false'
-
-    str_screen_num = (row - 1) * 3
-    screen_num = 0
-
-    tab_key = "" if len(job) == 10 else "[tab]"
-    input_val = ''
-
+def get_screen_xml(screen_num, entry_screen_flag, exit_screen_flag, input_val):
     ha_script = f"""
     <screen name="Screen{screen_num}" entryscreen="{entry_screen_flag}" exitscreen="{exit_screen_flag}" transient="false">
         <description>
@@ -22,7 +13,7 @@ def write_it(outf, job, eff_date, pol, row, last_row):
         </description>
 
         <actions>
-            <input value="{input_val}[enter]" row="0" col="0" movecursor="true" xlatehostkeys="true"
+            <input value="{input_val}" row="0" col="0" movecursor="true" xlatehostkeys="true"
                    encrypted="false"/>
         </actions>
 
@@ -32,22 +23,27 @@ def write_it(outf, job, eff_date, pol, row, last_row):
     </screen>
     """
 
-    screen_num = str_screen_num + 1
+    return ha_script
+
+
+def write_it(outf, job, eff_date, pol, row, last_row):
+    screen_num = (row - 1) * 3
+
     entry_screen_flag = "true" if row == 1 else "false"
-    exit_screen_flag = 'false'
-    input_val = f'{job}{tab_key}{eff_date}[enter]'
-    outf.write(ha_script)
-
-    screen_num = str_screen_num + 2
-    entry_screen_flag = 'false'
-    exit_screen_flag = 'false'
-    input_val = f'{pol}{pol}[enter]'
-    outf.write(ha_script)
-
-    screen_num = str_screen_num + 3
-    entry_screen_flag = 'false'
     exit_screen_flag = "true" if last_row else "false"
+
+    tab_key = "" if len(job) == 10 else "[tab]"
+
+    input_val = f'{job}{tab_key}{eff_date}[enter]'
+    ha_script = get_screen_xml(screen_num + 1, entry_screen_flag, exit_screen_flag, input_val)
+    outf.write(ha_script)
+
+    input_val = f'{pol}{pol}[enter]'
+    ha_script = get_screen_xml(screen_num + 2, entry_screen_flag, exit_screen_flag, input_val)
+    outf.write(ha_script)
+
     input_val = '[tab]y[enter]'
+    ha_script = get_screen_xml(screen_num + 3, entry_screen_flag, exit_screen_flag, input_val)
     outf.write(ha_script)
 
 
