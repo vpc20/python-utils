@@ -28,20 +28,22 @@ def get_screen_xml(screen_num, entry_screen_flag, exit_screen_flag, input_val):
 
 def write_it(outf, job, eff_date, pol, row, last_row):
     screen_num = (row - 1) * 3
-
-    entry_screen_flag = "true" if row == 1 else "false"
-    exit_screen_flag = "true" if last_row else "false"
-
     tab_key = "" if len(job) == 10 else "[tab]"
 
+    entry_screen_flag = "true" if row == 1 else "false"
+    exit_screen_flag = "false"
     input_val = f'{job}{tab_key}{eff_date}[enter]'
     ha_script = get_screen_xml(screen_num + 1, entry_screen_flag, exit_screen_flag, input_val)
     outf.write(ha_script)
 
+    entry_screen_flag = "false"
+    exit_screen_flag = "false"
     input_val = f'{pol}{pol}[enter]'
     ha_script = get_screen_xml(screen_num + 2, entry_screen_flag, exit_screen_flag, input_val)
     outf.write(ha_script)
 
+    entry_screen_flag = "false"
+    exit_screen_flag = "true" if last_row else "false"
     input_val = '[tab]y[enter]'
     ha_script = get_screen_xml(screen_num + 3, entry_screen_flag, exit_screen_flag, input_val)
     outf.write(ha_script)
