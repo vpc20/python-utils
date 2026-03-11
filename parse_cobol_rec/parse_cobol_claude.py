@@ -94,6 +94,7 @@ def format_field_expr(record_name: str, position: int, size: int,
     total_digits, decimal_places, is_numeric = analyze_pic_clause(pic_clause)
     substr = f"SUBSTR({record_name}, {position}, {size})"
     ct = comp_type.strip().upper() if comp_type else None
+    alias = alias.replace('-', '_')
 
     if ct in PACKED_DECIMAL_TYPES:
         return (
@@ -247,12 +248,12 @@ def generate_substr_from_file(filename: str) -> str:
     """Read a COBOL record definition from *filename* and return SQL expressions."""
     with open(filename, 'r') as f:
         content = f.read()
-    return '\n'.join(parse_cobol_record(content))
+    return ',\n'.join(parse_cobol_record(content))
 
 
 def generate_substr_from_text(text: str) -> str:
     """Generate SQL expressions from a COBOL record definition string."""
-    return '\n'.join(parse_cobol_record(text))
+    return ',\n'.join(parse_cobol_record(text))
 
 
 # ---------------------------------------------------------------------------

@@ -1,0 +1,6 @@
+       01  FLATFLD.
+           05 ITEM-CODE        PIC X(4).
+           05 VAL-PACKED-POS   PIC S9(3)V99  COMP-3.
+           05 VAL-PACKED-NEG   PIC S9(3)V99  COMP-3.
+           05 VAL-ZONED-POS    PIC S9(3)V99.
+           05 VAL-ZONED-NEG    PIC S9(3)V99.
