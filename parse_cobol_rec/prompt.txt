@@ -1,0 +1,62 @@
+create a function which returns the sql substring functions text from a cobol record definition.
+the input is a text file with the record defintion.
+the output is 'SUBSTR(recname, start_position, length)' for each of the field in the record.
+take note of the level numbers which are the leftmost numbers of each line eg. 01, 05, 10.
+COBOL level numbers define data hierarchy, ranging from 01–49 for record/group items,
+with special numbers 66, 77, and 88. Level 01 initiates a record, 02–49 subdivide it
+while 77 indicates independent items, and 88 defines condition names (conditional variables).
+Ignore levels 66, 77, 88.
+
+Example 1:
+input1.txt
+01  RECNAME.
+    05 FLD1             PIC X(3).
+    05 FLD2             PIC X(5).
+    05 FLD3             PIC S9(3)V99.
+    05 FLD4             PIC S9(3)V99  COMP-3.
+    05 FLD5             PIC S9(3)V99  COMP.
+
+output:
+SUBSTR(RECNAME, 1, 3), SUBSTR(RECNAME, 4, 5), SUBSTR(RECNAME, 9, 5),
+SUBSTR(RECNAME, 14, 3), SUBSTR(RECNAME, 17, 4)
+
+
+Example 2:
+input.txt
+01  RECNAME.
+    05 FLD1             PIC X(3).
+    05 FLD2             PIC X(5) OCCURS 3.
+    05 FLD3             OCCURS 2.
+       10 FLD3A         PIC X(2).
+       10 FLD3B         PIC X(3).
+    05 FLD4             PIC X(5).
+
+output:
+SUBSTR(RECNAME, 1, 3), SUBSTR(RECNAME, 4, 5), SUBSTR(RECNAME, 9, 5),
+SUBSTR(RECNAME, 14, 5), SUBSTR(RECNAME, 19, 2), SUBSTR(RECNAME, 21, 3),
+SUBSTR(RECNAME, 24, 2), SUBSTR(RECNAME, 26, 3), SUBSTR(RECNAME, 29, 5)
+
+
+
+
+Key Features:
+
+Level Number Handling: Ignores levels 01, 66, 77, 88 and processes elementary items
+PIC Clause Parsing: Calculates field sizes from PICTURE clauses (X, 9, S9, V)
+COMP Type Support:
+
+COMP-3: Packed decimal format - (digits + 1) / 2 bytes
+COMP/BINARY: Binary format - 2, 4, or 8 bytes based on digit count
+
+
+OCCURS Handling: Expands arrays and nested groups correctly
+Group Items: Processes hierarchical structures with nested fields
+
+The function correctly handles both examples:
+
+Example 1: Elementary fields with various COMP types
+Example 2: OCCURS clauses and nested group structures
+
+
+picture clause regex
+\bPIC(?:TURE)?\s+(?:IS\s+)?([X9AZSV\+\-\$,\.\/\*BP](?:\(\d+\))?)+(?=\s+(?:COMP|VALUE|USAGE|OCCURS|\.|$)|\s*\.)

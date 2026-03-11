@@ -1,0 +1,10 @@
+01  RECNAME.
+    05 FLD1             PIC X(3).
+    05 FLD2             PIC X(5).
+    05 FLD3             PIC S9(3)V99.
+    05 FLD4             PIC S9(3)V99  COMP-3.
+    05 FLD5             PIC S9(5)V99  COMP.
+    05 FLD6             PIC S999v9(5).
+    05 FLD7             PIC S9(3)V9(3).
+    05 FLD8             PIC 999.
+    05 FLD9             PIC 999v99.
