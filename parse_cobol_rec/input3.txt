@@ -1,6 +1,8 @@
-       01  FLATFLD.
-           05 ITEM-CODE        PIC X(4).
-           05 VAL-PACKED-POS   PIC S9(3)V99  COMP-3.
-           05 VAL-PACKED-NEG   PIC S9(3)V99  COMP-3.
-           05 VAL-ZONED-POS    PIC S9(3)V99.
-           05 VAL-ZONED-NEG    PIC S9(3)V99.
+       01  MESSAGE-DATA.
+           05  WS-MSG-TEXT        PIC X(10).
+           05  WS-MSG-ZONED_POS   PIC S9(5)V99.
+           05  WS-MSG-ZONED_NEG   PIC S9(5)V99.
+           05  WS-MSG-PACKED_POS  PIC S9(5)V99   COMP-3.
+           05  WS-MSG-PACKED_NEG  PIC S9(5)V99   COMP-3.
+           05  WS-MSG-BINARY_POS  PIC S9(5)      COMP-4.
+           05  WS-MSG-BINARY_NEG  PIC S9(5)      COMP-4.

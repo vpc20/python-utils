@@ -129,9 +129,10 @@ def parse_cobol_record(file_content: str) -> List[str]:
     # Find record name from the 01 level
     record_name = None
     for line in lines:
-        m = re.match(r'\s*01\s+(\w+)', line)
+        # m = re.match(r'\s*01\s+(\w+)', line)
+        m = re.match(r'\s*01\s+([\w-]+)', line)
         if m:
-            record_name = m.group(1)
+            record_name = m.group(1).replace('-', '_')
             break
     if not record_name:
         raise ValueError("No 01-level record found")
