@@ -44,22 +44,6 @@ def analyze_pic_clause(pic_clause: str) -> Tuple[int, int, bool]:
     return total_digits, decimal_places, is_numeric
 
 
-def binary_sql_type(total_digits: int) -> str:
-    """
-    Return the SQL integer type for a COMP-4 / BINARY field based on digit count.
-
-    PIC S9(1)  to S9(4)  -> SMALLINT  (2 bytes)
-    PIC S9(5)  to S9(9)  -> INTEGER   (4 bytes)
-    PIC S9(10) to S9(18) -> BIGINT    (8 bytes)
-    """
-    if total_digits <= 4:
-        return 'SMALLINT'
-    elif total_digits <= 9:
-        return 'INTEGER'
-    else:
-        return 'BIGINT'
-
-
 def calculate_field_size(pic_clause: str, comp_type: Optional[str] = None) -> int:
     """
     Calculate the storage size in bytes of a COBOL field.
@@ -99,50 +83,34 @@ def format_field_expr(record_name: str, position: int, size: int,
 
     Rules:
       Packed decimal (COMP-3 / COMPUTATIONAL-3 / PACKED-DECIMAL / COMP / COMPUTATIONAL)
-          -> INTERPRET(CAST(SUBSTR(rec, pos, size) AS BINARY(size)) AS DECIMAL(total, dec)) AS alias
-
-      Binary integer (COMP-4 / COMPUTATIONAL-4 / BINARY)
-          -> INTERPRET(CAST(SUBSTR(rec, pos, size) AS BINARY(size)) AS SMALLINT|INTEGER|BIGINT) AS alias
+          -> INTERPRET(BINARY(SUBSTR(rec, pos, size)) AS DECIMAL(total, dec)) AS alias
 
       Zoned decimal (any display numeric field — pure 9s, with or without V)
-          -> INTERPRET(CAST(SUBSTR(rec, pos, size) AS BINARY(size)) AS NUMERIC(total, dec)) AS alias
+          -> INTERPRET(BINARY(SUBSTR(rec, pos, size)) AS NUMERIC(total, dec)) AS alias
 
-      Everything else (alphanumeric X fields)
-          -> CAST(SUBSTR(rec, pos, size) AS CHAR(size) CCSID 37) AS alias
-
-    Alias: leading WS_MSG_ / WS_ prefixes are stripped for brevity.
+      Everything else (alphanumeric X fields, or binary integer COMP-4/BINARY)
+          -> SUBSTR(rec, pos, size) AS alias
     """
     total_digits, decimal_places, is_numeric = analyze_pic_clause(pic_clause)
-    substr    = f"SUBSTR({record_name}, {position}, {size})"
-    cast_bin  = f"CAST({substr} AS BINARY({size}))"
-    ct        = comp_type.strip().upper() if comp_type else None
-
-    # Strip common COBOL record-name prefixes from the alias
+    substr = f"SUBSTR({record_name}, {position}, {size})"
+    ct = comp_type.strip().upper() if comp_type else None
     alias = alias.replace('-', '_')
-    for prefix in ('WS_MSG_', 'WS_'):
-        if alias.upper().startswith(prefix):
-            alias = alias[len(prefix):]
-            break
 
     if ct in PACKED_DECIMAL_TYPES:
         return (
-            f"INTERPRET({cast_bin} AS DECIMAL({total_digits}, {decimal_places}))"
+            f"INTERPRET(BINARY({substr}) AS DECIMAL({total_digits}, {decimal_places}))"
             f" AS {alias}"
         )
 
-    if ct in BINARY_TYPES:
-        int_type = binary_sql_type(total_digits)
-        return f"INTERPRET({cast_bin} AS {int_type}) AS {alias}"
-
-    if is_numeric:
-        # Zoned (display) numeric
+    if is_numeric and ct not in BINARY_TYPES:
+        # Zoned (display) numeric — all-9 fields with no binary COMP type
         return (
-            f"INTERPRET({cast_bin} AS NUMERIC({total_digits}, {decimal_places}))"
+            f"INTERPRET(BINARY({substr}) AS NUMERIC({total_digits}, {decimal_places}))"
             f" AS {alias}"
         )
 
-    # Plain alphanumeric
-    return f"CAST({substr} AS CHAR({size}) CCSID 37) AS {alias}"
+    # Plain alphanumeric or binary integer field
+    return f"{substr} AS {alias}"
 
 
 # ---------------------------------------------------------------------------
@@ -161,6 +129,7 @@ def parse_cobol_record(file_content: str) -> List[str]:
     # Find record name from the 01 level
     record_name = None
     for line in lines:
+        # m = re.match(r'\s*01\s+(\w+)', line)
         m = re.match(r'\s*01\s+([\w-]+)', line)
         if m:
             record_name = m.group(1).replace('-', '_')

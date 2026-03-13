@@ -99,50 +99,44 @@ def format_field_expr(record_name: str, position: int, size: int,
 
     Rules:
       Packed decimal (COMP-3 / COMPUTATIONAL-3 / PACKED-DECIMAL / COMP / COMPUTATIONAL)
-          -> INTERPRET(CAST(SUBSTR(rec, pos, size) AS BINARY(size)) AS DECIMAL(total, dec)) AS alias
+          -> INTERPRET(BINARY(SUBSTR(rec, pos, size)) AS DECIMAL(total, dec)) AS alias
 
       Binary integer (COMP-4 / COMPUTATIONAL-4 / BINARY)
-          -> INTERPRET(CAST(SUBSTR(rec, pos, size) AS BINARY(size)) AS SMALLINT|INTEGER|BIGINT) AS alias
+          -> INTERPRET(BINARY(SUBSTR(rec, pos, size)) AS SMALLINT|INTEGER|BIGINT) AS alias
 
       Zoned decimal (any display numeric field — pure 9s, with or without V)
-          -> INTERPRET(CAST(SUBSTR(rec, pos, size) AS BINARY(size)) AS NUMERIC(total, dec)) AS alias
+          -> INTERPRET(BINARY(SUBSTR(rec, pos, size)) AS NUMERIC(total, dec)) AS alias
 
       Everything else (alphanumeric X fields)
-          -> CAST(SUBSTR(rec, pos, size) AS CHAR(size) CCSID 37) AS alias
-
-    Alias: leading WS_MSG_ / WS_ prefixes are stripped for brevity.
+          -> SUBSTR(rec, pos, size) AS alias
     """
     total_digits, decimal_places, is_numeric = analyze_pic_clause(pic_clause)
-    substr    = f"SUBSTR({record_name}, {position}, {size})"
-    cast_bin  = f"CAST({substr} AS BINARY({size}))"
-    ct        = comp_type.strip().upper() if comp_type else None
-
-    # Strip common COBOL record-name prefixes from the alias
+    substr = f"SUBSTR({record_name}, {position}, {size})"
+    ct = comp_type.strip().upper() if comp_type else None
     alias = alias.replace('-', '_')
-    for prefix in ('WS_MSG_', 'WS_'):
-        if alias.upper().startswith(prefix):
-            alias = alias[len(prefix):]
-            break
 
     if ct in PACKED_DECIMAL_TYPES:
         return (
-            f"INTERPRET({cast_bin} AS DECIMAL({total_digits}, {decimal_places}))"
+            f"INTERPRET(BINARY({substr}) AS DECIMAL({total_digits}, {decimal_places}))"
             f" AS {alias}"
         )
 
     if ct in BINARY_TYPES:
         int_type = binary_sql_type(total_digits)
-        return f"INTERPRET({cast_bin} AS {int_type}) AS {alias}"
+        return (
+            f"INTERPRET(BINARY({substr}) AS {int_type})"
+            f" AS {alias}"
+        )
 
     if is_numeric:
-        # Zoned (display) numeric
+        # Zoned (display) numeric — all-9 fields with no binary COMP type
         return (
-            f"INTERPRET({cast_bin} AS NUMERIC({total_digits}, {decimal_places}))"
+            f"INTERPRET(BINARY({substr}) AS NUMERIC({total_digits}, {decimal_places}))"
             f" AS {alias}"
         )
 
     # Plain alphanumeric
-    return f"CAST({substr} AS CHAR({size}) CCSID 37) AS {alias}"
+    return f"{substr} AS {alias}"
 
 
 # ---------------------------------------------------------------------------
