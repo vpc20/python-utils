@@ -70,6 +70,21 @@ def get_range_values(*args):
         bas.MsgBox(f"Cell B{i} value: {val}")
 
 
+def get_range_by_offset(*args):
+    doc = CreateScriptService("Calc")
+    bas = CreateScriptService("Basic")
+
+    sheet_name = doc.Sheets[0]  # dynamically get first sheet name
+
+    for row in range(2):
+        for col in range(3):
+            cell = doc.Offset("A1", row, col)
+            col_letter = chr(65 + col)  # 1=A, 2=B, 3=C ...
+            # cell_ref = f"{sheet_name}.{col_letter}{row}"
+            cell_val = doc.GetValue(cell)
+            bas.MsgBox(f"Cell at row {row + 1}, col {col + 1} ({col_letter}{row + 1}): value: {cell_val}")
+
+
 def fill_range(*args):
     bas = CreateScriptService("Basic")
 
