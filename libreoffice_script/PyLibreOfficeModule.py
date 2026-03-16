@@ -79,10 +79,10 @@ def get_range_by_offset(*args):
     for row in range(2):
         for col in range(3):
             cell = doc.Offset("A1", row, col)
-            cell_a1style = doc.A1Style(row+1, col+1).replace('$', '')
+            cell_a1style = doc.A1Style(row + 1, col + 1).replace('$', '')
             cell_val = doc.GetValue(cell)
             bas.MsgBox(f"Cell at row {row + 1}, col {col + 1} ({cell_a1style}): value: {cell_val}")
-            
+
             # col_letter = chr(65 + col)  # 1=A, 2=B, 3=C ...
             # bas.MsgBox(f"Cell at row {row + 1}, col {col + 1} ({col_letter}{row + 1}): value: {cell_val}")
 
