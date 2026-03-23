@@ -1,4 +1,4 @@
-       01  RECNAME.
+       01  WS-DTAQ-MESSAGE.
            05 FLD1             PIC X(3).
            05 FLD2             PIC X(5) OCCURS 3.
            05 FLD3             OCCURS 2.
